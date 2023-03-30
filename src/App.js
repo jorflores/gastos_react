@@ -1,30 +1,40 @@
 import "./App.css";
-import Expenses from "./Expenses";
+import Expenses from "./Expenses/Expenses";
+import NewExpense from "./NewExpense/NewExpense";
+import { useState, useEffect } from "react";
 
 function App() {
-  const expenses = [
+  const [expenses, setExpenses] = useState([]);
+
+  async function getExpenses() {
+    let response = await fetch(
+      "https://api-expenses-prueba.azurewebsites.net/api/expenses"
+    );
+    let data = await response.json();
+    setExpenses(data);
+  }
+
+  useEffect(() => {
+    getExpenses();
+  }, []);
+
+  /*
+  const [expenses, setExpenses] = useState([
     { title: "Gimnasio", amount: 500.0, date: new Date(2022, 1, 28) },
     { title: "Servicios", amount: 1500, date: new Date(2022, 1, 28) },
-    { title: "Renta", amount: 3000.0, date: new Date(2022, 1, 28) },
-  ];
+    { title: "Renta", amount: 4000.0, date: new Date(2022, 1, 28) },
+  ]);*/
 
-  const month = expenses[0].date.toLocaleString("en-US", { month: "long" });
-  const day = expenses[0].date.toLocaleString("en-US", { day: "2-digit" });
-  const year = expenses[0].date.getFullYear();
+  const saveExpenseDataHandler = (enteredExpenseData) => {
+    setExpenses((prevExpenses) => {
+      return [...prevExpenses, enteredExpenseData];
+    });
+  };
 
   return (
     <div className="App">
-      <div className="expense-item">
-        <div className="expense-date">
-          <div className="expense-date__month">{month}</div>
-          <div className="expense-date__year">{year}</div>
-          <div className="expense-date__day">{day}</div>
-        </div>
-        <div className="expense-item__description">
-          <h2>{expenses[0].title}</h2>
-          <div className="expense-item__price">${expenses[0].amount}</div>
-        </div>
-      </div>
+      <NewExpense onSaveExpenseData={saveExpenseDataHandler} />
+      <Expenses items={expenses} />
     </div>
   );
 }
